@@ -1,0 +1,9 @@
+[package]
+authors = ["Clemens Tiedt <clemens.tiedt@student.hpi.de>"]
+edition = "2018"
+name = "influx-client"
+version = "0.1.0"
+[dependencies]
+num-traits = "0.2"
+reqwest = {version = "0.10", features = ["blocking"]}
+ureq = "0.11"
