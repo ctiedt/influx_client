@@ -2,15 +2,20 @@
 //! This library supports the 2.x API.
 //! It is still very early in development, so features may be missing or not working.
 
-mod flux;
+pub mod flux;
 use std::{fmt::Display, io::Read};
 
-pub use flux::{Filter, NumericFilter, Precision, ReadQuery, StringFilter, WriteQuery};
+pub use flux::{Precision, ReadQuery, WriteQuery};
+
+#[derive(Debug)]
+pub struct InfluxError {
+    msg: Option<String>,
+}
 
 /// Use a Client to connect to your influx database and execute queries.
 pub struct Client<'a> {
     url: &'a str,
-    token: &'a str,
+    token: String,
     reqwest_client: reqwest::blocking::Client,
 }
 
@@ -19,9 +24,21 @@ impl<'a> Client<'a> {
     pub fn new(url: &'a str, token: &'a str) -> Self {
         Self {
             url,
-            token,
+            token: token.to_owned(),
             reqwest_client: reqwest::blocking::Client::new(),
         }
+    }
+
+    /// Create a client that reads its token from the
+    /// `INFLUXDB_TOKEN` environment variable
+    pub fn from_env(url: &'a str) -> Result<Self, InfluxError> {
+        Ok(Self {
+            url,
+            token: std::env::var("INFLUXDB_TOKEN").map_err(|e| InfluxError {
+                msg: Some(e.to_string()),
+            })?,
+            reqwest_client: reqwest::blocking::Client::new(),
+        })
     }
 
     /// Insert a new value into a bucket.
@@ -32,7 +49,7 @@ impl<'a> Client<'a> {
         org: &'a str,
         precision: Precision,
         query: WriteQuery<T>,
-    ) {
+    ) -> Result<(), InfluxError> {
         self.reqwest_client
             .post(&format!(
                 "{}/api/v2/write?org={}&bucket={}&precision={}",
@@ -44,18 +61,21 @@ impl<'a> Client<'a> {
                 query.name, query.field_name, query.value
             ))
             .send()
-            .unwrap();
+            .map_err(|e| InfluxError {
+                msg: Some(e.to_string()),
+            })?;
+        Ok(())
     }
 
     /// Retrieve a value from a bucket based on certain filters.
-    pub fn get(&self, org: &'a str, query: ReadQuery) -> String {
+    pub fn get(&self, org: &'a str, query: ReadQuery) -> Result<String, InfluxError> {
         self.get_raw(org, &format!("{}", query))
     }
 
     /// If you prefer to write your own `flux` queries, use this method.
     /// As `flux` support is not complete yet, this is currently the only
     /// way to use the full `flux` language.
-    pub fn get_raw(&self, org: &'a str, query: &'a str) -> String {
+    pub fn get_raw(&self, org: &'a str, query: &'a str) -> Result<String, InfluxError> {
         let mut buf = String::new();
         self.reqwest_client
             .post(&format!("{}/api/v2/query?org={}", self.url, org))
@@ -64,9 +84,14 @@ impl<'a> Client<'a> {
             .header("Authorization", &format!("Token {}", self.token))
             .body(query.to_owned())
             .send()
-            .unwrap()
+            .map_err(|e| InfluxError {
+                msg: Some(e.to_string()),
+            })?
             .read_to_string(&mut buf)
-            .unwrap();
-        buf
+            .map_err(|e| InfluxError {
+                msg: Some(e.to_string()),
+            })?;
+
+        Ok(buf)
     }
 }

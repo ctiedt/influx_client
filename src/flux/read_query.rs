@@ -1,8 +1,6 @@
 use std::fmt::Display;
 
-use super::filter;
-use super::Precision;
-use filter::Filter;
+use super::functions::{Filter, Range};
 
 /// Use this struct to read from a bucket.
 pub struct ReadQuery<'a> {
@@ -20,30 +18,13 @@ impl<'a> ReadQuery<'a> {
         }
     }
 
-    pub fn range(
-        mut self,
-        start: Option<(i32, Precision)>,
-        stop: Option<(i32, Precision)>,
-    ) -> Self {
-        if let (Some((start_time, start_precision)), Some((stop_time, stop_precision))) =
-            (&start, &stop)
-        {
-            self.range.replace(format!(
-                "range(start: {}{}, stop: {}{}",
-                start_time, start_precision, stop_time, stop_precision
-            ));
-        } else if let (Some((start_time, start_precision)), None) = (&start, &stop) {
-            self.range
-                .replace(format!("range(start: {}{})", start_time, start_precision));
-        } else if let (None, Some((stop_time, stop_precision))) = (&start, &stop) {
-            self.range
-                .replace(format!("range(stop: {}{})", stop_time, stop_precision));
-        }
+    pub fn range(mut self, range: Range) -> Self {
+        self.range.replace(range.to_string());
         self
     }
 
     pub fn filter<T: Filter>(mut self, kind: T) -> Self {
-        self.filters.push(format!("{}", kind));
+        self.filters.push(kind.to_string());
         self
     }
 }

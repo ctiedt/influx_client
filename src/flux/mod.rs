@@ -1,16 +1,16 @@
 //! This module provides the types to read from and write into buckets.
 //! However, the query language `flux` is not fully supported yet.
 
-mod filter;
+pub mod functions;
 mod read_query;
 mod write_query;
 
 use std::fmt::Display;
 
-pub use filter::{Filter, NumericFilter, StringFilter};
 pub use read_query::ReadQuery;
 pub use write_query::WriteQuery;
 
+#[allow(non_camel_case_types)]
 pub enum Precision {
     h,
     s,
