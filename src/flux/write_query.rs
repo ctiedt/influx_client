@@ -1,4 +1,10 @@
-use std::{collections::BTreeMap, fmt::Display, time::Instant};
+use std::{
+    collections::BTreeMap,
+    fmt::Display,
+    time::{Instant, SystemTime, UNIX_EPOCH},
+};
+
+use crate::Precision;
 
 /// Use this struct to write data to a bucket.
 pub struct WriteQuery<'a, T: Display> {
@@ -6,7 +12,7 @@ pub struct WriteQuery<'a, T: Display> {
     pub tags: BTreeMap<&'a str, &'a str>,
     pub field_name: &'a str,
     pub value: T,
-    pub timestamp: Option<Instant>,
+    pub timestamp: Option<(SystemTime, Precision)>,
 }
 
 impl<'a, T: Display> WriteQuery<'a, T> {
@@ -15,7 +21,7 @@ impl<'a, T: Display> WriteQuery<'a, T> {
         tags: BTreeMap<&'a str, &'a str>,
         field_name: &'a str,
         value: T,
-        timestamp: Option<Instant>,
+        timestamp: Option<(SystemTime, Precision)>,
     ) -> Self {
         Self {
             name,
@@ -36,17 +42,39 @@ impl<'a, T: Display> WriteQuery<'a, T> {
                 .collect()
         }
     }
+
+    fn format_timestamp(&self) -> String {
+        if let Some((system_time, precision)) = &self.timestamp {
+            // We are just going to assume that the system time is after the UNIX Epoch
+            let ts = system_time
+                .duration_since(UNIX_EPOCH)
+                .expect("SystemTime before UNIX Epoch");
+            format!(
+                " {}",
+                match precision {
+                    Precision::h => (ts.as_secs() as u128) / 3600,
+                    Precision::s => (ts.as_secs() as u128),
+                    Precision::ms => (ts.as_millis() as u128),
+                    Precision::us => (ts.as_micros() as u128),
+                    Precision::ns => (ts.as_nanos() as u128),
+                }
+            )
+        } else {
+            String::new()
+        }
+    }
 }
 
 impl<'a, T: Display> Display for WriteQuery<'a, T> {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
         write!(
             f,
-            "{}{} {}={}",
+            "{}{} {}={}{}",
             self.name,
             self.format_tags(),
             self.field_name,
-            self.value
+            self.value,
+            self.format_timestamp(),
         )
     }
 }

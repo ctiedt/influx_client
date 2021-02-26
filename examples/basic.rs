@@ -1,4 +1,4 @@
-use std::collections::BTreeMap;
+use std::{collections::BTreeMap, time::SystemTime};
 
 use influx_client::{
     flux::functions::{NumericFilter, Range, StringFilter},
@@ -15,7 +15,7 @@ fn main() {
         tags,
         field_name: "i",
         value: 42,
-        timestamp: None,
+        timestamp: Some((SystemTime::now(), Precision::ns)),
     };
 
     println!("{}", data);

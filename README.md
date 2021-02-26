@@ -1,4 +1,5 @@
 # influx_client
+[![crates-badge](https://img.shields.io/crates/v/influx_client?style=for-the-badge)](https://crates.io/crates/influx_client) [![docs-badge](https://img.shields.io/docsrs/influx-client/latest?style=for-the-badge)](https://docs.rs/influx_client)
 
 A Rust library to interact with [InfluxDB](https://www.influxdata.com/) databases.
 It is still early in development, so expect bugs and missing features.
