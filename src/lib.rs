@@ -5,11 +5,12 @@
 pub mod flux;
 use std::{fmt::Display, io::Read};
 
+use csv::StringRecord;
 pub use flux::{Precision, ReadQuery, WriteQuery};
 
 #[derive(Debug)]
 pub struct InfluxError {
-    msg: Option<String>,
+    pub msg: Option<String>,
 }
 
 /// Use a Client to connect to your influx database and execute queries.
@@ -70,6 +71,16 @@ impl<'a> Client<'a> {
     /// Retrieve a value from a bucket based on certain filters.
     pub fn get(&self, org: &'a str, query: ReadQuery) -> Result<String, InfluxError> {
         self.get_raw(org, &format!("{}", query))
+    }
+
+    pub fn get_csv(
+        &self,
+        org: &'a str,
+        query: ReadQuery,
+    ) -> Result<Vec<StringRecord>, InfluxError> {
+        let res = self.get(org, query)?;
+        let reader = csv::ReaderBuilder::new().from_reader(res.as_bytes());
+        Ok(reader.into_records().map(|r| r.unwrap()).collect())
     }
 
     /// If you prefer to write your own `flux` queries, use this method.

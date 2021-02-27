@@ -1,7 +1,7 @@
 use std::{
-    collections::BTreeMap,
+    collections::HashMap,
     fmt::Display,
-    time::{Instant, SystemTime, UNIX_EPOCH},
+    time::{SystemTime, UNIX_EPOCH},
 };
 
 use crate::Precision;
@@ -9,7 +9,7 @@ use crate::Precision;
 /// Use this struct to write data to a bucket.
 pub struct WriteQuery<'a, T: Display> {
     pub name: &'a str,
-    pub tags: BTreeMap<&'a str, &'a str>,
+    pub tags: HashMap<&'a str, &'a str>,
     pub field_name: &'a str,
     pub value: T,
     pub timestamp: Option<(SystemTime, Precision)>,
@@ -18,7 +18,7 @@ pub struct WriteQuery<'a, T: Display> {
 impl<'a, T: Display> WriteQuery<'a, T> {
     pub fn new(
         name: &'a str,
-        tags: BTreeMap<&'a str, &'a str>,
+        tags: HashMap<&'a str, &'a str>,
         field_name: &'a str,
         value: T,
         timestamp: Option<(SystemTime, Precision)>,
