@@ -2,7 +2,7 @@
 authors = ["Clemens Tiedt <clemens.tiedt@student.hpi.de>"]
 edition = "2018"
 name = "influx-client"
-version = "0.2.0"
+version = "0.3.0"
 description = "A Rust library to interact with InfluxDB"
 license = "MIT"
 repository = "https://github.com/ctiedt/influx_client"
