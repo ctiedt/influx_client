@@ -12,16 +12,18 @@ It is still early in development, so expect bugs and missing features.
 
 ## Examples
 
-Reading from a bucket:
+Writing to a bucket:
 
 ```rust
+use std::{collections::HashMap, time::SystemTime};
+
 use influx_client::{
-    Client, Precision, WriteQuery,
+    Client, InfluxError, Precision, WriteQuery,
 };
 
-fn main() {
+fn main() -> Result<(), InfluxError> {
     let client = Client::from_env("http://localhost:8086").expect("INFLUXDB_TOKEN not set");
-    let mut tags = BTreeMap::new();
+    let mut tags = HashMap::new();
     tags.insert("t1", "v1");
     tags.insert("t2", "v2");
     let data = WriteQuery {
@@ -29,31 +31,32 @@ fn main() {
         tags,
         field_name: "i",
         value: 42,
-        timestamp: None,
+        timestamp: Some((SystemTime::now(), Precision::ns)),
     };
 
-    client.insert("home", "home", Precision::ms, data);
+    client.insert("home", "home", Precision::ms, data)?;
 }
+
 ```
 
-Writing to a bucket:
+Reading from a bucket:
 
 ```rust
-use std::collections::BTreeMap;
-
 use influx_client::{
     flux::functions::{NumericFilter, Range, StringFilter},
-    Client, Precision, ReadQuery,
+    Client, InfluxError, Precision, ReadQuery,
 };
 
-fn main() {
+fn main() -> Result<(), InfluxError> {
     let client = Client::from_env("http://localhost:8086").expect("INFLUXDB_TOKEN not set");
-
+    
     let q = ReadQuery::new("home")
         .range(Range::new(Some((-12, Precision::h)), None))
         .filter(StringFilter::Eq("_measurement", "test"))
         .filter(NumericFilter::Lt("_value", 99));
 
-    println!("{}", client.get("home", q).unwrap());
+    println!("{}", client.get("home", q)?);
+    Ok(())
 }
+
 ```
