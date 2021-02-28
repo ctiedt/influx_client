@@ -3,7 +3,7 @@
 use std::{collections::HashMap, time::SystemTime};
 
 use influx_client::{
-    flux::functions::{NumericFilter, Range, StringFilter},
+    flux::functions::{Limit, NumericFilter, Range, Sort, StringFilter},
     Client, InfluxError, Precision, ReadQuery, WriteQuery,
 };
 
@@ -25,7 +25,9 @@ fn main() -> Result<(), InfluxError> {
     let q = ReadQuery::new("home")
         .range(Range::new(Some((-12, Precision::h)), None))
         .filter(StringFilter::Eq("_measurement", "test"))
-        .filter(NumericFilter::Lt("_value", 99));
+        .filter(NumericFilter::Lt("_value", 99))
+        .sort(Sort::new(&["_value"], false))
+        .limit(Limit::new(2, 0));
 
     println!("{}", client.get("home", q)?);
     Ok(())
