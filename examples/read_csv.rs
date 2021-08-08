@@ -3,8 +3,9 @@
 // If you want them parsed, take a look at the csv_records example.
 
 use influx_client::{
+    blocking::Client,
     flux::functions::{NumericFilter, Range, StringFilter},
-    Client, InfluxError, Precision, ReadQuery,
+    InfluxError, Precision, ReadQuery,
 };
 
 fn main() -> Result<(), InfluxError> {

@@ -1,25 +1,14 @@
-//! An unofficial library to read from and write to [InfluxDB](https://www.influxdata.com/) databases.
-//! This library supports the 2.x API.
-//! It is still very early in development, so features may be missing or not working.
-
-pub mod blocking;
-pub mod flux;
-use std::fmt::Display;
+use std::{fmt::Display, io::Read};
 
 use csv::StringRecord;
-pub use flux::{Precision, ReadQuery, WriteQuery};
-use futures::TryFutureExt;
 
-#[derive(Debug)]
-pub struct InfluxError {
-    pub msg: Option<String>,
-}
+use crate::{InfluxError, Precision, ReadQuery, WriteQuery};
 
 /// Use a Client to connect to your influx database and execute queries.
 pub struct Client<'a> {
     url: &'a str,
     token: String,
-    reqwest_client: reqwest::Client,
+    reqwest_client: reqwest::blocking::Client,
 }
 
 impl<'a> Client<'a> {
@@ -28,7 +17,7 @@ impl<'a> Client<'a> {
         Self {
             url,
             token: token.to_owned(),
-            reqwest_client: reqwest::Client::new(),
+            reqwest_client: reqwest::blocking::Client::new(),
         }
     }
 
@@ -40,18 +29,18 @@ impl<'a> Client<'a> {
             token: std::env::var("INFLUXDB_TOKEN").map_err(|e| InfluxError {
                 msg: Some(e.to_string()),
             })?,
-            reqwest_client: reqwest::Client::new(),
+            reqwest_client: reqwest::blocking::Client::new(),
         })
     }
 
     /// Insert a new value into a bucket.
     /// Note that not all attributes on `WriteQuery` are supported yet.
-    pub async fn insert<T: Display>(
+    pub fn insert<T: Display>(
         &self,
         bucket: &'a str,
         org: &'a str,
         precision: Precision,
-        query: WriteQuery<'a, T>,
+        query: WriteQuery<T>,
     ) -> Result<(), InfluxError> {
         self.reqwest_client
             .post(&format!(
@@ -66,22 +55,21 @@ impl<'a> Client<'a> {
             .send()
             .map_err(|e| InfluxError {
                 msg: Some(e.to_string()),
-            })
-            .await?;
+            })?;
         Ok(())
     }
 
     /// Retrieve a value from a bucket based on certain filters.
-    pub async fn get(&self, org: &'a str, query: ReadQuery<'a>) -> Result<String, InfluxError> {
-        self.get_raw(org, &format!("{}", query)).await
+    pub fn get(&self, org: &'a str, query: ReadQuery) -> Result<String, InfluxError> {
+        self.get_raw(org, &format!("{}", query))
     }
 
-    pub async fn get_csv(
+    pub fn get_csv(
         &self,
         org: &'a str,
-        query: ReadQuery<'a>,
+        query: ReadQuery,
     ) -> Result<Vec<StringRecord>, InfluxError> {
-        let res = self.get(org, query).await?;
+        let res = self.get(org, query)?;
         let reader = csv::ReaderBuilder::new().from_reader(res.as_bytes());
         Ok(reader.into_records().map(|r| r.unwrap()).collect())
     }
@@ -89,7 +77,8 @@ impl<'a> Client<'a> {
     /// If you prefer to write your own `flux` queries, use this method.
     /// As `flux` support is not complete yet, this is currently the only
     /// way to use the full `flux` language.
-    pub async fn get_raw(&self, org: &'a str, query: &'a str) -> Result<String, InfluxError> {
+    pub fn get_raw(&self, org: &'a str, query: &'a str) -> Result<String, InfluxError> {
+        let mut buf = String::new();
         self.reqwest_client
             .post(&format!("{}/api/v2/query?org={}", self.url, org))
             .header("Accept", "application/csv")
@@ -97,14 +86,14 @@ impl<'a> Client<'a> {
             .header("Authorization", &format!("Token {}", self.token))
             .body(query.to_owned())
             .send()
-            .await
             .map_err(|e| InfluxError {
                 msg: Some(e.to_string()),
             })?
-            .text()
-            .await
+            .read_to_string(&mut buf)
             .map_err(|e| InfluxError {
                 msg: Some(e.to_string()),
-            })
+            })?;
+
+        Ok(buf)
     }
 }

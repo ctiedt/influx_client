@@ -4,8 +4,9 @@ use std::{convert::TryFrom, fmt::Display, num::ParseIntError};
 
 use csv::StringRecord;
 use influx_client::{
+    blocking::Client,
     flux::functions::{NumericFilter, Range, StringFilter},
-    Client, InfluxError, Precision, ReadQuery,
+    InfluxError, Precision, ReadQuery,
 };
 
 // We define our own record type with all the data we want.

@@ -7,7 +7,8 @@ use influx_client::{
     Client, InfluxError, Precision, ReadQuery, WriteQuery,
 };
 
-fn main() -> Result<(), InfluxError> {
+#[tokio::main]
+async fn main() -> Result<(), InfluxError> {
     let client = Client::from_env("http://localhost:8086").expect("INFLUXDB_TOKEN not set");
     let mut tags = HashMap::new();
     tags.insert("t1", "v1");
@@ -20,7 +21,7 @@ fn main() -> Result<(), InfluxError> {
         timestamp: Some((SystemTime::now(), Precision::ns)),
     };
 
-    client.insert("home", "home", Precision::ms, data)?;
+    client.insert("home", "home", Precision::ms, data).await?;
 
     let q = ReadQuery::new("home")
         .range(Range::new(Some((-12, Precision::h)), None))
@@ -29,6 +30,6 @@ fn main() -> Result<(), InfluxError> {
         .sort(Sort::new(&["_value"], false))
         .limit(Limit::new(2, 0));
 
-    println!("{}", client.get("home", q)?);
+    println!("{}", client.get("home", q).await?);
     Ok(())
 }

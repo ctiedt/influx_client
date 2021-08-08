@@ -2,12 +2,16 @@
 authors = ["Clemens Tiedt <clemens.tiedt@student.hpi.de>"]
 edition = "2018"
 name = "influx-client"
-version = "0.3.1"
+version = "0.4.0"
 description = "A Rust library to interact with InfluxDB"
 license = "MIT"
 repository = "https://github.com/ctiedt/influx_client"
 
 [dependencies]
+csv = "1.1"
+futures = "0.3"
 num-traits = "0.2"
-reqwest = {version = "0.11.1", features = ["blocking"]}
-csv = "1.1.5"
+reqwest = {version = "0.11", features = ["blocking"]}
+
+[dev-dependencies]
+tokio = {version = "1.9", features = ["full"]}
