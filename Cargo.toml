@@ -10,6 +10,7 @@ repository = "https://github.com/ctiedt/influx_client"
 [dependencies]
 csv = "1.1"
 futures = "0.3"
+itertools = "0.10.5"
 num-traits = "0.2"
 reqwest = {version = "0.11", features = ["blocking"]}
 

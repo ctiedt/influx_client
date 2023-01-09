@@ -8,6 +8,7 @@ use std::fmt::Display;
 
 use csv::StringRecord;
 pub use flux::{Precision, ReadQuery, WriteQuery};
+use itertools::Itertools;
 use futures::TryFutureExt;
 
 #[derive(Debug)]
@@ -60,8 +61,11 @@ impl<'a> Client<'a> {
             ))
             .header("Authorization", &format!("Token {}", self.token))
             .body(format!(
-                "{} {}={}",
-                query.name, query.field_name, query.value
+                "{}{} {}={}",
+                query.name,
+                query.tags.iter().map(|(key,val)| format!(",{}={}", key, val)).join(""),
+                query.field_name,
+                query.value
             ))
             .send()
             .map_err(|e| InfluxError {
