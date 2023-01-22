@@ -8,7 +8,6 @@ use std::fmt::Display;
 
 use csv::StringRecord;
 pub use flux::{Precision, ReadQuery, WriteQuery};
-use itertools::Itertools;
 use futures::TryFutureExt;
 
 #[derive(Debug)]
@@ -63,7 +62,11 @@ impl<'a> Client<'a> {
             .body(format!(
                 "{}{} {}={}",
                 query.name,
-                query.tags.iter().map(|(key,val)| format!(",{}={}", key, val)).join(""),
+                query
+                    .tags
+                    .iter()
+                    .map(|(key, val)| format!(",{}={}", key, val))
+                    .collect::<String>(),
                 query.field_name,
                 query.value
             ))
