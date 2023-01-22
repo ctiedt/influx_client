@@ -1,7 +1,6 @@
 use std::{fmt::Display, io::Read};
 
 use csv::StringRecord;
-use itertools::Itertools;
 
 use crate::{InfluxError, Precision, ReadQuery, WriteQuery};
 
@@ -56,7 +55,7 @@ impl<'a> Client<'a> {
                     .tags
                     .iter()
                     .map(|(key, val)| format!(",{}={}", key, val))
-                    .join(""),
+                    .collect::<String>(),
                 query.field_name,
                 query.value
             ))
