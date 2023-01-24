@@ -54,7 +54,7 @@ impl<'a> Client<'a> {
                 query
                     .tags
                     .iter()
-                    .map(|(key, val)| format!(",{}={}", key, val))
+                    .map(|(key, val)| format!(",{key}={val}"))
                     .collect::<String>(),
                 query.field_name,
                 query.value
@@ -68,7 +68,7 @@ impl<'a> Client<'a> {
 
     /// Retrieve a value from a bucket based on certain filters.
     pub fn get(&self, org: &'a str, query: ReadQuery) -> Result<String, InfluxError> {
-        self.get_raw(org, &format!("{}", query))
+        self.get_raw(org, &query.to_string())
     }
 
     pub fn get_csv(

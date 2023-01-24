@@ -19,7 +19,7 @@ fn main() -> Result<(), InfluxError> {
     let csv = client.get_csv("home", q)?;
     for rec in &csv {
         for (i, v) in rec.iter().enumerate() {
-            println!("{}: {}", i, v);
+            println!("{i}: {v}");
         }
     }
     Ok(())

@@ -36,10 +36,7 @@ impl<'a, T: Display> WriteQuery<'a, T> {
         if self.tags.is_empty() {
             String::new()
         } else {
-            self.tags
-                .iter()
-                .map(|(k, v)| format!(",{}={}", k, v))
-                .collect()
+            self.tags.iter().map(|(k, v)| format!(",{k}={v}")).collect()
         }
     }
 
@@ -53,10 +50,10 @@ impl<'a, T: Display> WriteQuery<'a, T> {
                 " {}",
                 match precision {
                     Precision::h => (ts.as_secs() as u128) / 3600,
-                    Precision::s => (ts.as_secs() as u128),
-                    Precision::ms => (ts.as_millis() as u128),
-                    Precision::us => (ts.as_micros() as u128),
-                    Precision::ns => (ts.as_nanos() as u128),
+                    Precision::s => ts.as_secs() as u128,
+                    Precision::ms => ts.as_millis(),
+                    Precision::us => ts.as_micros(),
+                    Precision::ns => ts.as_nanos(),
                 }
             )
         } else {

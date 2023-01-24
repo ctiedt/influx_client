@@ -11,7 +11,7 @@ use influx_client::{
 
 // We define our own record type with all the data we want.
 // In a real-world scenario, you might want to parse the timestamp using e.g. chrono.
-
+#[allow(dead_code)]
 #[derive(Debug)]
 struct Record<T>
 where

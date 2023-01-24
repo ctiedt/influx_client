@@ -54,7 +54,7 @@ impl<'a> Display for ReadQuery<'a> {
             "from(bucket: \"{}\"){}{}{}{}",
             self.bucket,
             if let Some(range) = &self.range {
-                format!(" |> {}", range)
+                format!(" |> {range}")
             } else {
                 String::new()
             },
@@ -64,12 +64,12 @@ impl<'a> Display for ReadQuery<'a> {
                 String::new()
             },
             if let Some(sort) = &self.sort {
-                format!(" |> {}", sort)
+                format!(" |> {sort}")
             } else {
                 String::new()
             },
             if let Some(limit) = &self.limit {
-                format!(" |> {}", limit)
+                format!(" |> {limit}")
             } else {
                 String::new()
             }

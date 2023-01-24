@@ -1,6 +1,6 @@
 [package]
 authors = ["Clemens Tiedt <clemens.tiedt@student.hpi.de>"]
-edition = "2018"
+edition = "2021"
 name = "influx-client"
 version = "0.4.0"
 description = "A Rust library to interact with InfluxDB"

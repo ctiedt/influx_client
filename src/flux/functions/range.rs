@@ -21,13 +21,12 @@ impl Display for Range {
         {
             write!(
                 f,
-                "range(start: {}{}, stop: {}{}",
-                start_time, start_precision, stop_time, stop_precision
+                "range(start: {start_time}{start_precision}, stop: {stop_time}{stop_precision}",
             )
         } else if let (Some((start_time, start_precision)), None) = (&self.start, &self.stop) {
-            write!(f, "range(start: {}{})", start_time, start_precision)
+            write!(f, "range(start: {start_time}{start_precision})")
         } else if let (None, Some((stop_time, stop_precision))) = (&self.start, &self.stop) {
-            write!(f, "range(stop: {}{})", stop_time, stop_precision)
+            write!(f, "range(stop: {stop_time}{stop_precision})")
         } else {
             Err(std::fmt::Error)
         }

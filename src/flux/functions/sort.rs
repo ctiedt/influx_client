@@ -16,7 +16,7 @@ impl<'a> Display for Sort<'a> {
         let columns = if self.columns.is_empty() {
             String::new()
         } else {
-            let escaped: Vec<String> = self.columns.iter().map(|c| format!("\"{}\"", c)).collect();
+            let escaped: Vec<String> = self.columns.iter().map(|c| format!("\"{c}\"")).collect();
             format!("columns: [{}]", escaped.join(", "))
         };
         let desc = if self.desc {
@@ -24,6 +24,6 @@ impl<'a> Display for Sort<'a> {
         } else {
             "desc: false"
         };
-        write!(f, "sort({}, {})", columns, desc)
+        write!(f, "sort({columns}, {desc})")
     }
 }
