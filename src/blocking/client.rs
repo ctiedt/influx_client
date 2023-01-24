@@ -49,8 +49,15 @@ impl<'a> Client<'a> {
             ))
             .header("Authorization", &format!("Token {}", self.token))
             .body(format!(
-                "{} {}={}",
-                query.name, query.field_name, query.value
+                "{}{} {}={}",
+                query.name,
+                query
+                    .tags
+                    .iter()
+                    .map(|(key, val)| format!(",{}={}", key, val))
+                    .collect::<String>(),
+                query.field_name,
+                query.value
             ))
             .send()
             .map_err(|e| InfluxError {
