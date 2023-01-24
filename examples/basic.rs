@@ -21,7 +21,7 @@ async fn main() -> Result<(), InfluxError> {
         timestamp: Some((SystemTime::now(), Precision::ns)),
     };
 
-    client.insert("home", "home", Precision::ms, data).await?;
+    client.insert("home", "home", Precision::ns, data).await?;
 
     let q = ReadQuery::new("home")
         .range(Range::new(Some((-12, Precision::h)), None))

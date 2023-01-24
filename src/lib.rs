@@ -59,17 +59,7 @@ impl<'a> Client<'a> {
                 self.url, org, bucket, precision
             ))
             .header("Authorization", &format!("Token {}", self.token))
-            .body(format!(
-                "{}{} {}={}",
-                query.name,
-                query
-                    .tags
-                    .iter()
-                    .map(|(key, val)| format!(",{key}={val}"))
-                    .collect::<String>(),
-                query.field_name,
-                query.value
-            ))
+            .body(query.to_string())
             .send()
             .map_err(|e| InfluxError {
                 msg: Some(e.to_string()),
